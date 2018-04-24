@@ -1,101 +1,90 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[41]:
 
 
 # -*- coding: utf-8 -*-
 import pandas as pd
-import pymysql
 import numpy as np
 
 
-# In[2]:
+# In[42]:
 
 
-# open mysql
-db_conn = pymysql.connect("192.168.89.38", "test", "test", "mq_admin", charset='utf8' )
+df_chat = pd.read_csv('/home/wilson/Downloads/group_chat_content(1).csv')
 
 
-# In[3]:
+# In[43]:
 
 
-my_sql = "select group_id, user_nickname, content, content_type from group_chat_content"
-df = pd.read_sql(my_sql, db_conn)
-
-db_conn.close()
+list(df_chat)
 
 
-# In[4]:
+# In[44]:
 
 
-df.head(10)
+df_chat_trim = df_chat.drop(['user_signature','time','region','city'],axis=1)
 
 
-# In[5]:
+# In[45]:
 
 
-# pd.notnull(df)
+list(df_chat_trim)
 
 
-# In[6]:
+# In[46]:
 
 
-df['content_length'] = df['content'].str.len()
+df_chat_trim.tail()
 
 
-# In[7]:
+# In[47]:
 
 
-# df.head()
+df_chat_trim['content_length'] = df_chat_trim['content'].str.len()
 
 
-# In[8]:
+# In[48]:
 
 
-df_ceshiqun = df[df['group_id']=='Wilson_我的测试群']
-# df_测试群.tail()
+df_chat_trim.head()
 
 
-# In[9]:
+# In[49]:
 
 
-df_youpintuangou = df[df['group_id']=='Wilson_优品团购']
-df_Wordpress = df[df['group_id']=='Wilson_Wordpress']
-df_lunchbreak = df[df['group_id']=='Wilson_lunchbreak']
-df_wenshawuyou4 = df[df['group_id']=='Wilson_温莎无忧4']
-df_wenshawuyou1 = df[df['group_id']=='Wilson_温莎无忧1']
-df_javascript = df[df['group_id']=='Wilson_javascript']
-df_xianyou = df[df['group_id']=='Wilson_鲜优']
-df_yiminjiangzuo = df[df['group_id']=='Wilson_移民讲座']
-df_nvshijie = df[df['group_id']=='Wilson_女世界']
-df_jubenzhijia = df[df['group_id']=='Wilson_剧本之家']
+# save user_info to a sinlge series
+json_user = df_chat_trim['user_info']
 
 
-# In[10]:
+# In[51]:
 
 
-df_jubenzhijia
+# count total messages of all time
+df_group_acti = df_chat_trim['group_displayname'].value_counts()
+df_group_acti = df_group_acti.to_frame()
+df_group_acti.head()
 
 
-# In[11]:
+# In[55]:
 
 
-jubenzhijia_chat_count = df_jubenzhijia['user_nickname'].value_counts()
-youpintuangou_chat_count = df_jubenzhijia['user_nickname'].value_counts()
-Wordpress_chat_count = df_Wordpress['user_nickname'].value_counts()
-lunchbreak_chat_count = df_lunchbreak['user_nickname'].value_counts()
-wenshawuyou4_chat_count = df_wenshawuyou4['user_nickname'].value_counts()
-wenshawuyou1_chat_count = df_wenshawuyou1['user_nickname'].value_counts()
-javascript_chat_count = df_javascript['user_nickname'].value_counts()
-xianyou_chat_count = df_xianyou['user_nickname'].value_counts()
-nvshijie_chat_count = df_nvshijie['user_nickname'].value_counts()
+# count total text messages
+df_group_text = df_chat_trim[df_chat_trim['content_type']=='Text']
+df_group_text_acti = df_group_text['group_displayname'].value_counts()
+df_group_text_acti = df_group_text_acti.to_frame()
+df_group_text_acti.head()
 
 
-# In[12]:
+# In[56]:
 
 
-xianyou_chat_count
+# count short text messages of all groups
+df_group_short_text = df_group_text[df_group_text['content_length']<=50]
+df_group_short_text_acti = df_group_short_text['group_displayname'].value_counts()
+df_group_short_text_acti = df_group_short_text_acti.to_frame()
+df_group_short_text_acti.head()
 
 
 # In[13]:
@@ -111,6 +100,13 @@ group_activity = df['group_id'].value_counts()
 group_activity
 
 
+# In[22]:
+
+
+# the total amount of groups
+print(len(group_activity))
+
+
 # In[15]:
 
 
@@ -124,28 +120,53 @@ group_UN_activity = df['user_nickname'].value_counts()
 group_UN_activity.head(10)
 
 
-# In[39]:
+# In[17]:
 
 
 df_group_mem = df[['group_id','user_nickname']]
 df_group_mem.head()
 
 
-# In[40]:
+# In[18]:
 
 
 df_group_mem_ = df_group_mem.groupby(["group_id","user_nickname"])
 
 
-# In[41]:
+# In[19]:
 
 
 df_group_mem_.size()
 
 
-# In[43]:
+# In[20]:
 
 
+# list the amount of messages in different groups of an individual 
 df_mem_group_ = df_group_mem.groupby(["user_nickname","group_id"])
 df_mem_group_.size()
+
+
+# In[30]:
+
+
+df_group = df.groupby(["user_nickname","content","group_id","content_type"])
+
+
+# In[32]:
+
+
+df_group = df_group.size()
+
+
+# In[35]:
+
+
+df_group = df_group.to_frame()
+
+
+# In[38]:
+
+
+df_group.head(10)
 
